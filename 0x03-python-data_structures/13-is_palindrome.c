@@ -1,87 +1,72 @@
-#include <stdio.h>
-#include <stdlib.h>
+#include "lists.h"
 
-typedef struct listint {
-    int n;
-    struct listint *next;
-} listint_t;
+/**
+ * reverse_listint - reverses a linked list
+ * @head: pointer to the first node in the list
+ *
+ * Return: pointer to the first node in the new list
+ */
+void reverse_listint(listint_t **head)
+{
+  listint_t *prev = NULL;
+  listint_t *current = *head;
+  listint_t *next = NULL;
 
-int is_palindrome(listint_t **head) {
-    if (*head == NULL || (*head)->next == NULL)
-        return 1;
-
-    listint_t *slow = *head, *fast = *head, *prev_slow = *head, *second_half;
-    int is_palindrome = 1;
-
-    while (fast != NULL && fast->next != NULL) {
-        fast = fast->next->next;
-
-        listint_t *next = slow->next;
-        slow->next = prev_slow;
-        prev_slow = slow;
-        slow = next;
+  while (current)
+    {
+      next = current->next;
+      current->next = prev;
+      prev = current;
+      current = next;
     }
 
-    if (fast != NULL)
-        slow = slow->next;
-
-    second_half = slow;
-    while (prev_slow != NULL && second_half != NULL) {
-        if (prev_slow->n != second_half->n) {
-            is_palindrome = 0;
-            break;
-        }
-        prev_slow = prev_slow->next;
-        second_half = second_half->next;
-    }
-
-    slow = NULL;
-    while (prev_slow != NULL) {
-        listint_t *next = prev_slow->next;
-        prev_slow->next = slow;
-        slow = prev_slow;
-        prev_slow = next;
-    }
-    *head = slow;
-
-    return is_palindrome;
+  *head = prev;
 }
 
-int main(void) {
-    listint_t *head = NULL;
+/**
+ * is_palindrome - checks if a linked list is a palindrome
+ * @head: double pointer to the linked list
+ *
+ * Return: 1 if it is, 0 if not
+ */
+int is_palindrome(listint_t **head)
+{
+  listint_t *slow = *head, *fast = *head, *temp = *head, *dup = NULL;
 
-    for (int i = 1; i <= 3; i++) {
-        listint_t *new_node = malloc(sizeof(listint_t));
-        if (new_node == NULL) {
-            perror("Memory allocation error");
-            return EXIT_FAILURE;
-        }
-        new_node->n = i;
-        new_node->next = head;
-        head = new_node;
-    }
-    for (int i = 3; i >= 1; i--) {
-        listint_t *new_node = malloc(sizeof(listint_t));
-        if (new_node == NULL) {
-            perror("Memory allocation error");
-            return EXIT_FAILURE;
-        }
-        new_node->n = i;
-        new_node->next = head;
-        head = new_node;
-    }
+  if (*head == NULL || (*head)->next == NULL)
+    return (1);
 
-    if (is_palindrome(&head))
-        printf("The list is a palindrome\n");
-    else
-        printf("The list is not a palindrome\n");
-
-    listint_t *temp;
-    while (head != NULL) {
-        temp = head;
-        head = head->next;
-        free(temp);
+  while (1)
+    {
+      fast = fast->next->next;
+      if (!fast)
+	{
+	  dup = slow->next;
+	  break;
+	}
+      if (!fast->next)
+	{
+	  dup = slow->next->next;
+	  break;
+	}
+      slow = slow->next;
     }
 
-    return EXIT_SUCCESS;
+  reverse_listint(&dup);
+
+  while (dup && temp)
+    {
+      if (temp->n == dup->n)
+	{
+	  dup = dup->next;
+	  temp = temp->next;
+	}
+      else
+	return (0);
+    }
+
+  if (!dup)
+    return (1);
+
+  return (0);
 }
